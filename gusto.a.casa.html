@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gusto a Casa - Cucina Regionale Italiana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #84a9ff;
+            --secondary-color: #6b91e8;
+            --dark: #1a1a1a;
+            --light-purple: #f5f8ff;
+            --white: #ffffff;
+            --gray: #f4f4f4;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--white);
+        }
+
+        /* Admin Button */
+        .admin-access {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .admin-btn {
+            background: linear-gradient(180deg, #84a9ff, #6b91e8);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(132, 169, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(132, 169, 255, 0.6);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: var(--danger);
+        }
+
+        .modal h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #84a9ff, #6b91e8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(132, 169, 255, 0.4);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            margin-left: 1rem;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray);
+            z-index: 1500;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background: linear-gradient(180deg, #84a9ff, #6b91e8);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-recipe-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-recipe-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .admin-recipe-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .admin-recipe-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .step-input-group {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--light-purple);
+            border-radius: 8px;
+        }
+
+        .add-step-btn {
+            background-color: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .remove-step-btn {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        header {
+            background: linear-gradient(180deg, #84a9ff 0%, #f5f8ff 100%);
+            color: var(--dark);
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            color: var(--dark);
+        }
+
+        nav {
+            background-color: var(--dark);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            background-color: var(--gray);
+            padding: 2rem 0;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .filter-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .filter-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.5rem;
+            background-color: var(--white);
+            border: 2px solid var(--primary-color);
+            color: var(--dark);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .filter-btn.active {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border-color: var(--secondary-color);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .recipe-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(132, 169, 255, 0.3);
+        }
+
+        .recipe-card.hidden {
+            display: none;
+        }
+
+        .recipe-header {
+            background: linear-gradient(180deg, #84a9ff, #6b91e8);
+            color: var(--white);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .recipe-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-region {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .recipe-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem;
+            background-color: var(--light-purple);
+            font-size: 0.85rem;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .recipe-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--light-purple), var(--gray));
+        }
+
+        .recipe-steps {
+            padding: 1.5rem;
+        }
+
+        .step {
+            margin-bottom: 1.2rem;
+            padding: 1.2rem;
+            background-color: var(--gray);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            line-height: 1.7;
+            color: var(--dark);
+        }
+
+        .ingredients-section {
+            padding: 1.5rem;
+            background-color: var(--light-purple);
+        }
+
+        .ingredients-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .ingredients-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ingredients-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(155, 89, 182, 0.2);
+        }
+
+        .ingredients-list li:before {
+            content: "✓ ";
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .about-section {
+            background: linear-gradient(180deg, #f5f8ff, var(--white));
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .about-section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        footer p {
+            opacity: 0.8;
+            margin: 0.5rem 0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .ingredient-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ingredient-input-group input {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .recipes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .admin-recipe-card {
+                flex-direction: column;
+            }
+
+            .admin-recipe-img {
+                width: 100%;
+                height: 200px;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Access Button -->
+    <div class="admin-access">
+        <button class="admin-btn" onclick="openLoginModal()">👤 Admin</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>🔐 Accesso Admin</h2>
+            <div id="loginAlert"></div>
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Accedi</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Recipe Modal -->
+    <div id="recipeModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeRecipeModal()">&times;</span>
+            <h2 id="recipeModalTitle">Aggiungi Nuova Ricetta</h2>
+            <form onsubmit="saveRecipe(event)">
+                <input type="hidden" id="recipeId">
+                
+                <div class="form-group">
+                    <label>Nome Ricetta *</label>
+                    <input type="text" id="recipeName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo Pasto *</label>
+                    <select id="recipeRegion" required>
+                        <option value="">Seleziona tipo pasto</option>
+                        <option value="colazione">Colazione</option>
+                        <option value="pranzo">Pranzo</option>
+                        <option value="cena">Cena</option>
+                        <option value="merenda">Merenda</option>
+                        <option value="aperitivo">Aperitivo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>URL Immagine (da telefono: carica su imgbb.com e incolla link) *</label>
+                    <input type="url" id="recipeImage" placeholder="https://esempio.com/immagine.jpg" required>
+                    <small style="color: #666;">💡 Carica l'immagine su <a href="https://imgbb.com" target="_blank">imgbb.com</a> e copia il link diretto</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Tempo preparazione (es: 30 min) *</label>
+                    <input type="text" id="recipeTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Difficoltà *</label>
+                    <select id="recipeDifficulty" required>
+                        <option value="Facile">Facile</option>
+                        <option value="Media">Media</option>
+                        <option value="Difficile">Difficile</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Porzioni (es: 4 persone) *</label>
+                    <input type="text" id="recipePortions" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ingredienti (uno per riga) *</label>
+                    <textarea id="recipeIngredients" rows="6" placeholder="400g pasta&#10;200g guanciale&#10;4 uova" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Procedimento *</label>
+                    <div id="stepsContainer"></div>
+                    <button type="button" class="add-step-btn" onclick="addStepField()">+ Aggiungi Passo</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%">Salva Ricetta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-header">
+            <div>
+                <h1>🍝 Pannello Admin</h1>
+                <p>Gestisci le ricette del sito</p>
+            </div>
+            <div>
+                <button class="btn btn-success" onclick="openAddRecipeModal()">+ Nuova Ricetta</button>
+                <button class="btn btn-logout" onclick="logout()">Esci</button>
+            </div>
+        </div>
+        <div id="adminRecipesList"></div>
+    </div>
+
+    <!-- Main Website -->
+    <div id="mainSite">
+        <header>
+            <div class="header-content">
+                <h1 style="font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; color: var(--dark);">Gusto a Casa</h1>
+                <p class="tagline">🍳 Ricette facili e veloci</p>
+                <p class="tagline">🥗 Colazioni, pranzi e cene per ogni giorno</p>
+            </div>
+        </header>
+
+        <nav>
+            <div class="nav-content">
+                <a href="#ricette">Ricette</a>
+                <a href="#chi-siamo">Chi Siamo</a>
+                <a href="#contatti">Contatti</a>
+            </div>
+        </nav>
+
+        <div class="filter-section">
+            <div class="filter-content">
+                <h3 class="filter-title">Filtra per Momento della Giornata</h3>
+                <div class="filter-buttons" id="filterButtons"></div>
+            </div>
+        </div>
+
+        <main>
+            <section id="ricette">
+                <h2 class="section-title">Le ricette per tutti i giorni</h2>
+                <div class="recipes-grid" id="recipesGrid"></div>
+            </section>
+
+            <section id="chi-siamo" class="about-section">
+                <div class="about-content">
+                    <h2>Chi Siamo</h2>
+                    <p>
+                        Ciao! Sono una <strong>food blogger</strong> e ho da poco aperto il mio profilo TikTok dedicato 
+                        alla cucina. La mia passione è condividere ricette <strong>facili, veloci e perfette per tutti i giorni</strong>.
+                    </p>
+                    <p>
+                        Ho creato <strong>Gusto a Casa</strong> per darti un modo in più di scoprire e salvare le mie ricette. 
+                        Qui troverai tutte le preparazioni che condivido sui social, organizzate in modo semplice e accessibile, 
+                        pronte per essere cucinate quando vuoi!
+                    </p>
+                    <p>
+                        Il mio obiettivo è aiutarti a preparare <strong>colazioni, pranzi e cene deliziosi</strong> senza 
+                        stress e senza passare ore in cucina. Che tu sia alle prime armi o un cuoco esperto, qui troverai 
+                        sempre l'ispirazione giusta per i tuoi pasti quotidiani.
+                    </p>
+                    <p>
+                        Grazie per essere qui e per far parte della famiglia di <strong>Gusto a Casa</strong>! 
+                        Seguimi anche su TikTok per video ricette e tanti consigli in cucina! 📱✨
+                    </p>
+                    <p>
+                        <strong>Buon appetito con Gusto a Casa! 🍝</strong>
+                    </p>
+                </div>
+            </section>
+        </main>
+
+        <footer id="contatti">
+            <p>&copy; 2024 Gusto a Casa. Tutti i diritti riservati.</p>
+            <p>Email: info@gustoacasa.it | Tel: +39 123 456 7890</p>
+        </footer>
+    </div>
+
+    <script>
+        // Admin credentials
+        const ADMIN_USERNAME = 'iria.manente';
+        const ADMIN_PASSWORD = 'Moraz10';
+
+        // Default recipes (will be loaded once if localStorage is empty)
+        const defaultRecipes = [
+            {
+                id: Date.now() + 1,
+                name: 'Toast al Formaggio',
+                region: 'colazione',
+                image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600',
+                time: '10 min',
+                difficulty: 'Facile',
+                portions: '2 persone',
+                ingredients: ['4 fette di pane in cassetta', '4 fette di formaggio', '2 cucchiai di burro', 'Sale e pepe'],
+                steps: [
+                    { title: 'Preparazione', description: 'Prendi le fette di pane e metti una fetta di formaggio su ciascuna. Copri con un\'altra fetta di pane per formare i sandwich.' },
+                    { title: 'Cottura', description: 'Scalda una padella antiaderente a fuoco medio e aggiungi il burro. Quando il burro è sciolto, metti i toast nella padella.' },
+                    { title: 'Doratura', description: 'Cuoci per 2-3 minuti per lato fino a quando il pane è dorato e croccante e il formaggio è completamente sciolto.' },
+                    { title: 'Servizio', description: 'Taglia i toast in diagonale e servi subito caldissimi. Perfetti per una colazione veloce e gustosa!' }
+                ]
+            },
+            {
+                id: Date.now() + 2,
+                name: 'Pasta al Pomodoro',
+                region: 'pranzo',
+                image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600',
+                time: '20 min',
+                difficulty: 'Facile',
+                portions: '4 persone',
+                ingredients: ['400g pasta', '400g pomodori pelati', '2 spicchi aglio', 'Basilico fresco', 'Olio EVO', 'Sale'],
+                steps: [
+                    { title: 'Soffritto', description: 'In una padella larga, scaldare abbondante olio extravergine d\'oliva. Aggiungere gli spicchi d\'aglio interi e farli dorare leggermente per 2 minuti.' },
+                    { title: 'Sugo', description: 'Aggiungere i pomodori pelati schiacciandoli con una forchetta. Salare e cuocere per 15 minuti a fuoco medio, mescolando di tanto in tanto.' },
+                    { title: 'Cottura Pasta', description: 'Nel frattempo, cuocere la pasta in abbondante acqua salata seguendo i tempi sulla confezione per una cottura al dente.' },
+                    { title: 'Mantecatura', description: 'Scolare la pasta e versarla nella padella con il sugo. Aggiungere il basilico fresco spezzettato, mescolare bene e servire con un filo d\'olio crudo.' }
+                ]
+            },
+            {
+                id: Date.now() + 3,
+                name: 'Pollo al Limone',
+                region: 'cena',
+                image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=600',
+                time: '35 min',
+                difficulty: 'Media',
+                portions: '4 persone',
+                ingredients: ['4 petti di pollo', '2 limoni', '2 spicchi aglio', 'Prezzemolo fresco', 'Farina', 'Vino bianco', 'Olio EVO', 'Sale e pepe'],
+                steps: [
+                    { title: 'Preparazione Pollo', description: 'Tagliare i petti di pollo a fettine sottili. Infarinarli leggermente su entrambi i lati, scuotendo l\'eccesso di farina.' },
+                    { title: 'Rosolatura', description: 'In una padella larga, scaldare olio e burro. Rosolare il pollo per 3-4 minuti per lato fino a doratura. Rimuovere e tenere da parte.' },
+                    { title: 'Salsa al Limone', description: 'Nella stessa padella, aggiungere aglio tritato, sfumare con vino bianco. Aggiungere il succo di limone, sale, pepe e prezzemolo tritato. Far addensare per 2 minuti.' },
+                    { title: 'Finitura', description: 'Rimettere il pollo nella padella con la salsa. Cuocere per altri 5 minuti a fuoco dolce. Servire caldissimo guarnito con fettine di limone e prezzemolo fresco.' }
+                ]
+            }
+        ];
+
+        let isLoggedIn = false;
+        let currentRecipes = [];
+
+        // Initialize app
+        function init() {
+            // Load recipes from localStorage or use defaults
+            const savedRecipes = localStorage.getItem('recipes');
+            if (savedRecipes) {
+                currentRecipes = JSON.parse(savedRecipes);
+            } else {
+                currentRecipes = [...defaultRecipes];
+                saveRecipesToStorage();
+            }
+            
+            renderRecipes();
+            renderFilters();
+            setupFilterListeners();
+        }
+
+        // Save recipes to localStorage
+        function saveRecipesToStorage() {
+            localStorage.setItem('recipes', JSON.stringify(currentRecipes));
+        }
+
+        // Login functions
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginAlert').innerHTML = '';
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                isLoggedIn = true;
+                closeLoginModal();
+                showAdminPanel();
+            } else {
+                document.getElementById('loginAlert').innerHTML = 
+                    '<div class="alert alert-danger">Credenziali non valide!</div>';
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            hideAdminPanel();
+        }
+
+        function showAdminPanel() {
+            document.getElementById('mainSite').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            document.querySelector('.admin-access').style.display = 'none';
+            renderAdminRecipes();
+        }
+
+        function hideAdminPanel() {
+            document.getElementById('mainSite').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.querySelector('.admin-access').style.display = 'block';
+            renderRecipes();
+        }
+
+        // Recipe Modal functions
+        function openAddRecipeModal() {
+            document.getElementById('recipeModalTitle').textContent = 'Aggiungi Nuova Ricetta';
+            document.getElementById('recipeId').value = '';
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeRegion').value = '';
+            document.getElementById('recipeImage').value = '';
+            document.getElementById('recipeTime').value = '';
+            document.getElementById('recipeDifficulty').value = 'Facile';
+            document.getElementById('recipePortions').value = '';
+            document.getElementById('recipeIngredients').value = '';
+            document.getElementById('stepsContainer').innerHTML = '';
+            addStepField();
+            document.getElementById('recipeModal').style.display = 'block';
+        }
+
+        function openEditRecipeModal(recipeId) {
+            const recipe = currentRecipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+
+            document.getElementById('recipeModalTitle').textContent = 'Modifica Ricetta';
+            document.getElementById('recipeId').value = recipe.id;
+            document.getElementById('recipeName').value = recipe.name;
+            document.getElementById('recipeRegion').value = recipe.region;
+            document.getElementById('recipeImage').value = recipe.image;
+            document.getElementById('recipeTime').value = recipe.time;
+            document.getElementById('recipeDifficulty').value = recipe.difficulty;
+            document.getElementById('recipePortions').value = recipe.portions;
+            document.getElementById('recipeIngredients').value = recipe.ingredients.join('\n');
+            
+            document.getElementById('stepsContainer').innerHTML = '';
+            recipe.steps.forEach(step => {
+                addStepField(step.title, step.description);
+            });
+
+            document.getElementById('recipeModal').style.display = 'block';
+        }
+
+        function closeRecipeModal() {
+            document.getElementById('recipeModal').style.display = 'none';
+        }
+
+        function addStepField(title = '', description = '') {
+            const container = document.getElementById('stepsContainer');
+            const stepCount = container.children.length + 1;
+            
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'step-input-group';
+            stepDiv.innerHTML = `
+                <label>Passo ${stepCount}</label>
+                <input type="text" class="step-title" placeholder="Titolo passo" value="${title}" required>
+                <textarea class="step-description" placeholder="Descrizione dettagliata" rows="3" required>${description}</textarea>
+                <button type="button" class="remove-step-btn" onclick="this.parentElement.remove()">Rimuovi Passo</button>
+            `;
+            container.appendChild(stepDiv);
+        }
+
+        function saveRecipe(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('recipeId').value;
+            const name = document.getElementById('recipeName').value;
+            const region = document.getElementById('recipeRegion').value;
+            const image = document.getElementById('recipeImage').value;
+            const time = document.getElementById('recipeTime').value;
+            const difficulty = document.getElementById('recipeDifficulty').value;
+            const portions = document.getElementById('recipePortions').value;
+            const ingredients = document.getElementById('recipeIngredients').value.split('\n').filter(i => i.trim());
+            
+            const stepElements = document.querySelectorAll('.step-input-group');
+            const steps = Array.from(stepElements).map(el => ({
+                title: el.querySelector('.step-title').value,
+                description: el.querySelector('.step-description').value
+            }));
+
+            const recipe = {
+                id: id ? parseInt(id) : Date.now(),
+                name,
+                region,
+                image,
+                time,
+                difficulty,
+                portions,
+                ingredients,
+                steps
+            };
+
+            if (id) {
+                // Edit existing recipe
+                const index = currentRecipes.findIndex(r => r.id === parseInt(id));
+                currentRecipes[index] = recipe;
+            } else {
+                // Add new recipe
+                currentRecipes.push(recipe);
+            }
+
+            saveRecipesToStorage();
+            closeRecipeModal();
+            renderAdminRecipes();
+            renderRecipes();
+            renderFilters();
+        }
+
+        function deleteRecipe(recipeId) {
+            if (confirm('Sei sicuro di voler eliminare questa ricetta?')) {
+                currentRecipes = currentRecipes.filter(r => r.id !== recipeId);
+                saveRecipesToStorage();
+                renderAdminRecipes();
+                renderRecipes();
+                renderFilters();
+            }
+        }
+
+        // Render functions
+        function renderRecipes() {
+            const grid = document.getElementById('recipesGrid');
+            grid.innerHTML = '';
+
+            currentRecipes.forEach(recipe => {
+                const card = createRecipeCard(recipe);
+                grid.appendChild(card);
+            });
+        }
+
+        function createRecipeCard(recipe) {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            card.setAttribute('data-region', recipe.region);
+
+            const ingredientsList = recipe.ingredients.map(ing => `<li>${ing}</li>`).join('');
+            const stepsList = recipe.steps.map((step, index) => `
+                <div class="step">
+                    <span class="step-number">Passo ${index + 1}: ${step.title}</span>
+                    <p class="step-description">${step.description}</p>
+                </div>
+            `).join('');
+
+            card.innerHTML = `
+                <div class="recipe-header">
+                    <h3 class="recipe-title">${recipe.name}</h3>
+                    <p class="recipe-region">${capitalizeRegion(recipe.region)}</p>
+                </div>
+                <div class="recipe-info">
+                    <div class="info-item">
+                        <div class="info-label">Tempo</div>
+                        <div>${recipe.time}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Difficoltà</div>
+                        <div>${recipe.difficulty}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Porzioni</div>
+                        <div>${recipe.portions}</div>
+                    </div>
+                </div>
+                <img src="${recipe.image}" alt="${recipe.name}" class="recipe-image" onerror="this.src='https://via.placeholder.com/600x300?text=Immagine+non+disponibile'">
+                <div class="ingredients-section">
+                    <h4 class="ingredients-title">Ingredienti</h4>
+                    <ul class="ingredients-list">${ingredientsList}</ul>
+                </div>
+                <div class="recipe-steps">${stepsList}</div>
+            `;
+
+            return card;
+        }
+
+        function renderAdminRecipes() {
+            const container = document.getElementById('adminRecipesList');
+            container.innerHTML = '';
+
+            if (currentRecipes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 2rem;">Nessuna ricetta presente. Aggiungi la prima ricetta!</p>';
+                return;
+            }
+
+            currentRecipes.forEach(recipe => {
+                const card = document.createElement('div');
+                card.className = 'admin-recipe-card';
+                card.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.name}" class="admin-recipe-img" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                    <div class="admin-recipe-info">
+                        <h3>${recipe.name}</h3>
+                        <p><strong>Tipo Pasto:</strong> ${capitalizeRegion(recipe.region)}</p>
+                        <p><strong>Tempo:</strong> ${recipe.time} | <strong>Difficoltà:</strong> ${recipe.difficulty}</p>
+                        <p><strong>Ingredienti:</strong> ${recipe.ingredients.length} | <strong>Passi:</strong> ${recipe.steps.length}</p>
+                    </div>
+                    <div class="admin-recipe-actions">
+                        <button class="btn btn-warning" onclick="openEditRecipeModal(${recipe.id})">✏️ Modifica</button>
+                        <button class="btn btn-danger" onclick="deleteRecipe(${recipe.id})">🗑️ Elimina</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderFilters() {
+            const container = document.getElementById('filterButtons');
+            // Predefined meal types
+            const mealTypes = ['tutte', 'colazione', 'pranzo', 'cena', 'merenda', 'aperitivo'];
+            
+            container.innerHTML = '';
+            mealTypes.forEach((mealType, index) => {
+                const button = document.createElement('button');
+                button.className = 'filter-btn' + (index === 0 ? ' active' : '');
+                button.setAttribute('data-region', mealType);
+                button.textContent = capitalizeRegion(mealType);
+                container.appendChild(button);
+            });
+
+            setupFilterListeners();
+        }
+
+        function setupFilterListeners() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const recipeCards = document.querySelectorAll('.recipe-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const selectedRegion = this.getAttribute('data-region');
+                    
+                    recipeCards.forEach(card => {
+                        const cardRegion = card.getAttribute('data-region');
+                        
+                        if (selectedRegion === 'tutte' || cardRegion === selectedRegion) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+
+                    window.scrollTo({
+                        top: document.getElementById('ricette').offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        }
+
+        function capitalizeRegion(region) {
+            if (region === 'tutte') return 'Tutte';
+            const mealNames = {
+                'colazione': 'Colazione',
+                'pranzo': 'Pranzo',
+                'cena': 'Cena',
+                'merenda': 'Merenda',
+                'aperitivo': 'Aperitivo'
+            };
+            return mealNames[region] || region;
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const recipeModal = document.getElementById('recipeModal');
+            if (event.target == loginModal) {
+                closeLoginModal();
+            }
+            if (event.target == recipeModal) {
+                closeRecipeModal();
+            }
+        }
+
+        // Initialize the app when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
